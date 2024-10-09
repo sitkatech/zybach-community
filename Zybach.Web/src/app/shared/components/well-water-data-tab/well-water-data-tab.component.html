@@ -1,0 +1,81 @@
+<div class="row col-12 mt-2">
+    <div class="col-6 mt-2">
+        <div class="card">
+            <div class="card-header">
+                Annual Pumped Volume
+                <div class="btn-group btn-group-toggle float-end">
+                    <label class="btn btn-toggle btn-sm btn-zybach" [ngClass]="unitsShown === 'gal' ? 'active' : ''">
+                        <input type="radio" name="units" id="gal" (click)="toggleUnitsShown('gal')" /> Volume&nbsp;(gal)
+                    </label>
+                    <label
+                        class="btn btn-toggle btn-sm btn-zybach"
+                        [ngClass]="[unitsShown === 'in' ? 'active' : '', displayIrrigatedAcres() ? '' : 'disabled']"
+                        style="width: 100px">
+                        <input type="radio" name="units" id="in" (click)="toggleUnitsShown('in')" [disabled]="!displayIrrigatedAcres()" /> Depth&nbsp;(in)
+                    </label>
+                </div>
+                <div class="float-end me-2" *ngIf="well.InAgHub">
+                    <button class="btn btn-sm btn-zybach" (click)="syncWithAgHub()">Sync with AgHub</button>
+                </div>
+            </div>
+            <div class="card-body text-center">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th style="text-align: center">Year</th>
+                            <th>Flow Meter</th>
+                            <th>Continuity Meter</th>
+                            <th>Electrical Usage</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let year of years">
+                            <td style="text-align: center">{{ year }}</td>
+                            <td>{{ getAnnualPumpedVolume(year, "Flow Meter") }}</td>
+                            <td>{{ getAnnualPumpedVolume(year, "Continuity Meter") }}</td>
+                            <td>{{ getAnnualPumpedVolume(year, "Electrical Usage") }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 mt-2">
+        <div class="card">
+            <div class="card-header">Current Sensors</div>
+            <div class="card-body text-center">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Sensor Name</th>
+                            <th>Sensor Type</th>
+                            <th>Last Message Age (hours)</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let sensor of sensorsWithStatus">
+                            <td>
+                                <a routerLink="/sensors/{{ sensor.SensorID }}">{{ sensor.SensorName }}</a>
+                            </td>
+                            <td>{{ sensor.SensorTypeName }}</td>
+                            <td *ngIf="sensor.LastMessageAgeInHours != null">{{ sensor.LastMessageAgeInHours }} hours</td>
+                            <td *ngIf="sensor.LastMessageAgeInHours == null">N/A</td>
+                            <td>{{ sensor.IsActive ? "Enabled" : "Disabled" }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row col-12 mt-4">
+    <div class="col">
+        <div class="card">
+            <div class="card-header">Flow Measurements</div>
+            <div class="card-body">
+                <zybach-sensor-chart [(sensorChartData)]="sensorChartData"></zybach-sensor-chart>
+            </div>
+        </div>
+    </div>
+</div>

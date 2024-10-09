@@ -1,0 +1,4 @@
+{
+  "sqlConnectionString": "#{sqlConnectionString}#",
+  "AzureBlobStorageConnectionString": "#{AzureBlobStorageConnectionString}#"
+}

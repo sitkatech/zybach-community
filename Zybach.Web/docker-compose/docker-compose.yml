@@ -1,0 +1,10 @@
+version: '3.7'
+
+services:
+  zybach.web:
+    image: zybach/web
+    build:
+      args:
+        env: ${ENVIRONMENT}
+      context: ../..
+      dockerfile: Zybach.Web/Dockerfile

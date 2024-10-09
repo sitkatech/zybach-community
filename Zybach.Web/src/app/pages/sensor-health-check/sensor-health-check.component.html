@@ -1,0 +1,92 @@
+<div class="container">
+    <app-alert-display></app-alert-display>
+
+    <div class="row mt-2">
+        <div class="col">
+            <h2>Sensor Health Check</h2>
+        </div>
+    </div>
+
+    <div class="row mt-2">
+        <div class="col">
+            <custom-rich-text [customRichTextTypeID]="customRichTextTypeID"></custom-rich-text>
+        </div>
+    </div>
+
+    <div class="row mt-2 align-items-center">
+        <div class="col-md-4 control-label text-md-end fw-bold mt-2">Enter Sensor Serial #:</div>
+
+        <div class="col-md-4 col-sm-7 mt-2">
+            <input type="text" class="form-control" [(ngModel)]="sensorNameInput" />
+        </div>
+
+        <div class="col-auto mt-2">
+            <button class="btn btn-md btn-primary" (click)="getSensorPulse()">Check Sensor Status</button>
+        </div>
+    </div>
+
+    <ng-container *ngIf="sensorName">
+        <div class="row">
+            <div class="col-md-8 m-auto">
+                <div class="card mt-3">
+                    <div class="card-body text-center">
+                        <ng-container *ngIf="paigeWirelessPulse$ | async; else noData">
+                            {{ receivedDate >= recentPulseCutoffDate ? "One or more" : "No" }}
+                            messages received from sensor <b>{{ sensorName }}</b> within the last {{ getRecentPulseCutoffHours() }} hours.
+
+                            <div class="mt-2">
+                                <i
+                                    [ngClass]="receivedDate >= recentPulseCutoffDate ? 'fa fa-check-circle text-success fa-2xl' : 'fa fa-times-circle text-secondary'"
+                                    style="font-size: 24px"></i>
+                            </div>
+
+                            <div class="mt-1">
+                                The most recent message was received {{ receivedDate | timeago }}
+                                <span *ngIf="hasContinuityReading()">
+                                    <br />
+                                    and reported the pump was <b>{{ sensorOn ? "on" : "off" }}</b> </span
+                                >.
+                            </div>
+                        </ng-container>
+
+                        <ng-template #noData>
+                            <div *ngIf="lastUpdated">
+                                <div>
+                                    No messages found for sensor <b>{{ sensorName }}</b
+                                    >.
+                                </div>
+                                <div class="my-2"><span class="fa fa-spinner loading-spinner"></span></div>
+                                <div>Checking again in {{ countdownTimer$ | async }} seconds...</div>
+                            </div>
+
+                            <div *ngIf="!lastUpdated">
+                                <div class="my-2"><span class="fa fa-spinner loading-spinner"></span></div>
+                            </div>
+                        </ng-template>
+                    </div>
+                </div>
+                <div class="text-end" *ngIf="lastUpdated">
+                    <i>Last refreshed at {{ lastUpdated | date: "mediumTime" }}</i>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-3" *ngIf="eventMessage">
+            <div class="col-md-8 m-auto">
+                <h3>Most Recent Message Details</h3>
+                <div>Reading Date: {{ receivedDate | date: "shortDate" }} at {{ receivedDate | date: "shortTime" }}</div>
+                <div *ngIf="hasContinuityReading">Continuity Status: {{ sensorOn ? "On" : "Off" }}</div>
+            </div>
+
+            <div class="col-md-8 m-auto">
+                <div class="card mt-2">
+                    <div class="card-body">
+                        <code>
+                            <pre>{{ eventMessage | json }}</pre>
+                        </code>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </ng-container>
+</div>

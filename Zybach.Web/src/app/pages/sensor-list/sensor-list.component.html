@@ -1,0 +1,40 @@
+<div class="container navCaretMargin">
+    <app-alert-display></app-alert-display>
+    <div class="row">
+        <div class="col-12">
+            <h2 class="d-inline-block">Sensor List</h2>
+            <custom-rich-text [customRichTextTypeID]="richTextTypeID"></custom-rich-text>
+        </div>
+    </div>
+    <div class="row">
+        <div class="row my-2">
+            <div class="col">
+                <div class="col">
+                    <a class="btn btn-zybach btn-md me-3 float-end" routerLink="/sensors/new" ngbTooltip="Create New Sensor" [placement]="['bottom', 'right', 'left', 'auto']"
+                        ><span class="fas fa-plus"></span> New Sensor
+                    </a>
+
+                    <button
+                        class="btn btn-secondary btn-md float-end me-3"
+                        style="cursor: pointer"
+                        (click)="exportToCsv()"
+                        ngbTooltip="Download as CSV"
+                        [placement]="['bottom', 'right', 'left', 'auto']">
+                        <i class="fas fa-download"></i>
+                    </button>
+                    <fresca-clear-grid-filters-button class="me-3 float-end" [grid]="sensorsGrid"> </fresca-clear-grid-filters-button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <ag-grid-angular
+        #sensorsGrid
+        style="width: 100%; height: 500px"
+        class="ag-theme-balham mt-2"
+        [rowData]="sensors"
+        [columnDefs]="sensorColumnDefs"
+        [pagination]="true"
+        [paginationPageSize]="100"
+        (gridReady)="onGridReady($event)">
+    </ag-grid-angular>
+</div>

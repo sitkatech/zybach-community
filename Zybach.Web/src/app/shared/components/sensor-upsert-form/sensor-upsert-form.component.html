@@ -1,0 +1,227 @@
+<form #sensorUpsertForm="ngForm">
+    <div class="row align-items-center">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body" *ngIf="loadingRequiredData">
+                    <div class="text-center">
+                        <span class="fa fa-spinner loading-spinner"></span>
+                    </div>
+                </div>
+                <div class="card-body" *ngIf="!loadingRequiredData">
+                    <!-- Sensor Details -->
+                    <div class="row col-12">
+                        <!-- Left Column-->
+                        <div class="row col-6 mt-4">
+                            <!-- Sensor Name -->
+                            <div class="col-6 control-label text-end mb-2">
+                                <label class="required"><strong>Sensor Name: </strong></label>
+                            </div>
+                            <div class="col-6 text-start mb-2">
+                                <input type="text" class="form-control" name="SensorName" placeholder="Sensor Name" [(ngModel)]="sensor.SensorName" [disabled]="!isNewSensor" />
+                            </div>
+
+                            <!--Sensor Model-->
+                            <div class="col-6 control-label text-end mb-2">
+                                <label class="required"><strong>Sensor Model: </strong></label>
+                            </div>
+                            <div class="col-6 text-start mb-2">
+                                <ng-select
+                                    [(ngModel)]="sensor.SensorModelID"
+                                    [items]="sensorModels"
+                                    bindLabel="ModelNumber"
+                                    bindValue="SensorModelID"
+                                    placeholder="Choose One"
+                                    name="SensorModel"
+                                    required
+                                    *ngIf="sensorModels">
+                                </ng-select>
+                            </div>
+                        </div>
+
+                        <!-- Right Column-->
+                        <div class="row col-6 mt-4">
+                            <!-- Sensor Type-->
+                            <div class="col-6 control-label text-end mb-2">
+                                <label class="required"><strong>Sensor Type: </strong></label>
+                            </div>
+                            <div class="col-6 text-start mb-2">
+                                <ng-select
+                                    [(ngModel)]="sensor.SensorTypeID"
+                                    [items]="sensorTypes"
+                                    bindLabel="SensorTypeDisplayName"
+                                    bindValue="SensorTypeID"
+                                    placeholder="Choose One"
+                                    name="SensorType"
+                                    required
+                                    [disabled]="!isNewSensor">
+                                </ng-select>
+                            </div>
+
+                            <!--Well-->
+                            <div class="col-6 control-label text-end mb-2">
+                                <label>
+                                    <strong> <field-definition [fieldDefinitionType]="'WellRegistrationNumber'"> </field-definition>: </strong>
+                                </label>
+                            </div>
+                            <div class="col-6 text-start mb-2">
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    name="WellRegistrationID"
+                                    [(ngModel)]="sensor.WellRegistrationID"
+                                    [ngbTypeahead]="searchApi"
+                                    placeholder="Search by Reg #"
+                                    [disabled]="!isNewSensor"
+                                    required />
+                                <small class="form-text text-muted font-italic" *ngIf="searchFailed">Suggestions could not be loaded.</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="w-90" />
+
+                    <!-- Installation Record -->
+                    <div class="row col-12">
+                        <!-- Left Column-->
+                        <div class="row col-6 mt-4">
+                            <!-- Installation Date -->
+                            <div class="col-6 control-label text-end mb-2">
+                                <label><strong>Installation Date: </strong></label>
+                            </div>
+                            <div class="col-6 text-start mb-2 form-group">
+                                <div class="input-group">
+                                    <input class="form-control" name="dp3" placeholder="yyyy-mm-dd" [(ngModel)]="sensor.InstallationDate" ngbDatepicker #d3="ngbDatepicker" />
+                                    <div class="input-group-append">
+                                        <button class="btn btn-zybach far fa-calendar" (click)="d3.toggle()" type="button"></button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Installer Initials -->
+                            <div class="col-6 control-label text-end mb-2">
+                                <label><strong>Installer Initials: </strong></label>
+                            </div>
+                            <div class="col-6 text-start mb-2">
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    name="InstallerInitials"
+                                    placeholder="Installer Initials"
+                                    [(ngModel)]="sensor.InstallerInitials"
+                                    maxlength="10" />
+                            </div>
+                        </div>
+
+                        <!-- Right Column-->
+                        <div class="row col-6 mt-4">
+                            <!-- Installation Organization -->
+                            <div class="col-6 control-label text-end mb-2">
+                                <label><strong>Installation Organization: </strong></label>
+                            </div>
+                            <div class="col-6 text-start mb-2">
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    name="InstallationOrganization"
+                                    placeholder="Installation Organization"
+                                    [(ngModel)]="sensor.InstallationOrganization"
+                                    maxlength="255" />
+                            </div>
+                            <!-- Installation Comments -->
+                            <div class="col-6 control-label text-end mb-2">
+                                <label><strong>Installation Comments: </strong></label>
+                            </div>
+                            <div class="col-6 text-start mb-2">
+                                <textarea class="form-control" name="InstallationComments" placeholder="Installation Comments" [(ngModel)]="sensor.InstallationComments">
+                                </textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pressure Sensor Fields-->
+                    <ng-container *ngIf="sensor.SensorTypeID == pressureSensorTypeID">
+                        <hr class="w-90" />
+
+                        <div class="row col-12">
+                            <!-- Left Column-->
+                            <div class="row col-6 mt-4">
+                                <!-- Well Depth -->
+                                <div class="col-6 control-label text-end mb-2">
+                                    <label><strong>Well Depth (ft): </strong></label>
+                                </div>
+                                <div class="col-6 text-start mb-2">
+                                    <input type="number" class="form-control" name="WellDepth" placeholder="Well Depth" [(ngModel)]="sensor.WellDepth" min="0" />
+                                </div>
+
+                                <!-- Cable Length-->
+                                <div class="col-6 control-label text-end mb-2">
+                                    <label><strong>Cable Length (ft): </strong></label>
+                                </div>
+                                <div class="col-6 text-start mb-2">
+                                    <input type="number" class="form-control" name="CableLength" placeholder="Cable Length" [(ngModel)]="sensor.CableLength" min="0" />
+                                </div>
+                            </div>
+
+                            <!-- Right Column-->
+                            <div class="row col-6 mt-4">
+                                <!-- Install Depth-->
+                                <div class="col-6 control-label text-end mb-2">
+                                    <label><strong>Install Depth (ft): </strong></label>
+                                </div>
+                                <div class="col-6 text-start mb-2">
+                                    <input type="number" class="form-control" name="InstallDepth" placeholder="Install Depth" [(ngModel)]="sensor.InstallDepth" min="0" />
+                                </div>
+
+                                <!-- Water Level-->
+                                <div class="col-6 control-label text-end mb-2">
+                                    <label><strong>Water Level (ft): </strong></label>
+                                </div>
+                                <div class="col-6 text-start mb-2">
+                                    <input type="number" class="form-control" name="WaterLevel" placeholder="Water Level" [(ngModel)]="sensor.WaterLevel" />
+                                </div>
+                            </div>
+                        </div>
+                    </ng-container>
+
+                    <!-- Flow Meter Fields-->
+                    <ng-container *ngIf="sensor.SensorTypeID == flowMeterTypeID">
+                        <hr class="w-90" />
+
+                        <div class="row col-12">
+                            <!-- Left Column-->
+                            <div class="row col-6 mt-4">
+                                <!-- Flow Meter Reading-->
+                                <div class="col-6 control-label text-end mb-2">
+                                    <label><strong>Flow Meter Reading: </strong></label>
+                                </div>
+                                <div class="col-6 text-start mb-2">
+                                    <input type="number" class="form-control" name="FlowMeterReading" placeholder="Flow Meter Reading" [(ngModel)]="sensor.FlowMeterReading" />
+                                </div>
+                            </div>
+
+                            <!-- Right Column-->
+                            <div class="row col-6 mt-4">
+                                <!-- Pipe Diameter-->
+                                <div class="col-6 control-label text-end mb-2">
+                                    <label><strong>Pipe Diameter: </strong></label>
+                                </div>
+                                <div class="col-6 text-start mb-2">
+                                    <ng-select
+                                        [(ngModel)]="sensor.PipeDiameterID"
+                                        [items]="pipeDiameters"
+                                        bindLabel="PipeDiameterDisplayName"
+                                        bindValue="PipeDiameterID"
+                                        placeholder="Choose One"
+                                        name="PipeDiameter"
+                                        required
+                                        *ngIf="pipeDiameters">
+                                    </ng-select>
+                                </div>
+                            </div>
+                        </div>
+                    </ng-container>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

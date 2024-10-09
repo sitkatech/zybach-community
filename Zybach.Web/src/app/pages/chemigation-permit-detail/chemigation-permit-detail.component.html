@@ -1,0 +1,613 @@
+<nav aria-label="breadcrumb" *ngIf="chemigationPermit">
+    <ol class="breadcrumb p-3">
+        <li class="breadcrumb-item">
+            <a routerLink="/chemigation-permits">Chemigation Permits</a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">Chemigation Permit #{{ chemigationPermit?.ChemigationPermitNumberDisplay }}</li>
+    </ol>
+</nav>
+<app-alert-display></app-alert-display>
+<div class="row m-3" *ngIf="chemigationPermit">
+    <div class="col-12">
+        <h2 class="d-inline-block">Chemigation Permit #{{ chemigationPermit.ChemigationPermitNumberDisplay }}</h2>
+        <a class="btn btn-zybach btn-md me-3 float-end disabled" routerLink="/"> Approve Annual Renewal </a>
+        <a class="btn btn-zybach btn-md me-3 float-end disabled" routerLink="/"> Schedule Inspection </a>
+    </div>
+    <div class="row container">
+        <div class="col-12 col-sm-6 label">
+            <strong> <field-definition [fieldDefinitionType]="'WellRegistrationNumber'"> </field-definition>: </strong>
+        </div>
+        <div class="col-12 col-sm-6">
+            <a *ngIf="chemigationPermit.Well" routerLink="/wells/{{ chemigationPermit.Well.WellID }}">{{ chemigationPermit.Well.WellRegistrationID }}</a>
+            <em *ngIf="!chemigationPermit.Well" class="text-muted">N/A</em>
+        </div>
+        <div class="col-12 col-sm-6 label"><strong>Permit Status: </strong></div>
+        <div class="col-12 col-sm-6">{{ chemigationPermit.ChemigationPermitStatus.ChemigationPermitStatusDisplayName }}</div>
+        <div class="col-12 col-sm-6 label"><strong>County: </strong></div>
+        <div class="col-12 col-sm-6">{{ chemigationPermit.County.CountyDisplayName }}</div>
+        <div class="col-12 col-sm-6 label"><strong>Last Inspected Date: </strong></div>
+        <div class="col-12 col-sm-6">
+            {{ latestInspection?.InspectionDate | date: "shortDate" }}
+            <em *ngIf="!latestInspection?.InspectionDate" class="text-muted">N/A</em>
+        </div>
+    </div>
+
+    <div class="col-12">
+        <a href="#" class="btn btn-zybach btn-md dropdown-toggle nav-link float-end p-2" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Other Actions
+        </a>
+        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+            <a class="dropdown-item" routerLink="/chemigation-permits/{{ chemigationPermit?.ChemigationPermitNumber }}/edit">
+                <span class="fas fa-edit"></span>
+                Edit Permit
+            </a>
+            <a
+                class="dropdown-item"
+                [ngClass]="{ disabled: permitHasCurrentRecord() }"
+                routerLink="/chemigation-permits/{{ chemigationPermit?.ChemigationPermitNumber }}/add-record">
+                <span class="fas fa-plus"></span>
+                Create Renewal
+            </a>
+        </div>
+    </div>
+</div>
+<div class="row mt-4 m-3">
+    <div class="col-sm-12">
+        <div class="card">
+            <div class="card-header d-flex align-items-center">
+                <div class="col-4 float-start ps-2">
+                    <div class="row align-items-center">
+                        <span class="far fa-calendar me-2 col-1"> </span>
+                        <div class="col-6">
+                            <zybach-water-year-select
+                                [(selectedYear)]="yearToDisplay"
+                                (selectedYearChange)="updateAnnualData()"
+                                [(allYearsSelected)]="allYearsSelected"
+                                (allYearsSelectedChange)="updateAnnualData()">
+                            </zybach-water-year-select>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-4 text-center ps-2">Annual Record</div>
+                <div class="col-4 float-end">
+                    <a
+                        class="btn btn-zybach btn-sm float-end"
+                        [ngClass]="{ disabled: !currentYearAnnualRecord }"
+                        routerLink="/chemigation-permits/{{ chemigationPermit?.ChemigationPermitNumber }}/{{ yearToDisplay }}/edit">
+                        <span class="fas fa-edit"></span> Edit Record
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row col-12 text-center" *ngIf="!currentYearAnnualRecord">
+                    <p><strong>No Annual Record available for this year</strong></p>
+                </div>
+                <div class="row col-12" *ngIf="currentYearAnnualRecord">
+                    <div class="row col-12">
+                        <div class="row col-6">
+                            <div class="row col-12">
+                                <div class="col-6 text-end">
+                                    <p><strong>Annual Record Status: </strong></p>
+                                </div>
+                                <div class="col-6 text-start">
+                                    <p>{{ currentYearAnnualRecord.ChemigationPermitAnnualRecordStatusName }}</p>
+                                </div>
+                            </div>
+
+                            <div class="row col-12">
+                                <div class="col-6 text-end">
+                                    <p><strong>Township, Range, Section: </strong></p>
+                                </div>
+                                <div class="col-6 text-start">
+                                    <p>{{ currentYearAnnualRecord.TownshipRangeSection }}</p>
+                                </div>
+                            </div>
+
+                            <div class="row col-12">
+                                <div class="col-6 text-end">
+                                    <p><strong>Date Received: </strong></p>
+                                </div>
+                                <div class="col-6 text-start">
+                                    <p>
+                                        {{ currentYearAnnualRecord.DateReceived | date: "shortDate" }}
+                                        <em *ngIf="!currentYearAnnualRecord.DateReceived" class="text-muted">N/A</em>
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="row col-12">
+                                <div class="col-6 text-end">
+                                    <p><strong>Date Paid: </strong></p>
+                                </div>
+                                <div class="col-6 text-start">
+                                    <p>
+                                        {{ currentYearAnnualRecord.DatePaid | date: "shortDate" }}
+                                        <em *ngIf="!currentYearAnnualRecord.DatePaid" class="text-muted">N/A</em>
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="row col-12">
+                                <div class="col-6 text-end">
+                                    <p><strong>Date Approved: </strong></p>
+                                </div>
+                                <div class="col-6 text-start">
+                                    <p>
+                                        {{ currentYearAnnualRecord.DateApproved | date: "shortDate" }}
+                                        <em *ngIf="!currentYearAnnualRecord.DateApproved" class="text-muted">N/A</em>
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="row col-12">
+                                <div class="col-6 text-end">
+                                    <p><strong>Pivot Name: </strong></p>
+                                </div>
+                                <div class="col-6 text-start">
+                                    <p>
+                                        {{ currentYearAnnualRecord.PivotName }}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="row col-12">
+                                <div class="col-6 text-end">
+                                    <p><strong>Injection Unit Type: </strong></p>
+                                </div>
+                                <div class="col-6 text-start">
+                                    <p>
+                                        {{ currentYearAnnualRecord.ChemigationInjectionUnitTypeName }}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="row col-12">
+                                <div class="col-6 text-end">
+                                    <p><strong>Fee Type: </strong></p>
+                                </div>
+                                <div class="col-6 text-start">
+                                    <p *ngIf="currentYearAnnualRecord.ChemigationPermitAnnualRecordFeeTypeName; else noFeeType">
+                                        {{ currentYearAnnualRecord.ChemigationPermitAnnualRecordFeeTypeName }}
+                                    </p>
+                                    <ng-template #noFeeType>
+                                        <em class="text-muted"> N/A </em>
+                                    </ng-template>
+                                </div>
+                            </div>
+
+                            <div class="row col-12">
+                                <div class="col-6 text-end">
+                                    <p><strong>NDEE Amount: </strong></p>
+                                </div>
+                                <div class="col-6 text-start">
+                                    <p *ngIf="currentYearAnnualRecord.NDEEAmount">${{ currentYearAnnualRecord.NDEEAmount | number: "1.2-2" }}</p>
+                                    <em *ngIf="!currentYearAnnualRecord.NDEEAmount" class="text-muted"> N/A </em>
+                                </div>
+                            </div>
+
+                            <div class="row col-12">
+                                <div class="col-6 text-end">
+                                    <p><strong>Annual Record Notes: </strong></p>
+                                </div>
+                                <div class="col-6 text-start">
+                                    <p *ngIf="currentYearAnnualRecord.AnnualNotes">
+                                        {{ currentYearAnnualRecord.AnnualNotes }}
+                                    </p>
+                                    <em *ngIf="!currentYearAnnualRecord.AnnualNotes" class="text-muted"> N/A </em>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row col-6">
+                            <div class="row col-12">
+                                <div class="col-6 text-end">
+                                    <p><strong>Applicant Company: </strong></p>
+                                </div>
+                                <div class="col-6 text-start">
+                                    <p>
+                                        {{ currentYearAnnualRecord.ApplicantCompany }}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="row col-12">
+                                <div class="col-6 text-end">
+                                    <p><strong>Applicant First Name: </strong></p>
+                                </div>
+                                <div class="col-6 text-start">
+                                    <p>
+                                        {{ currentYearAnnualRecord.ApplicantFirstName }}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="row col-12">
+                                <div class="col-6 text-end">
+                                    <p><strong>Applicant Last Name: </strong></p>
+                                </div>
+                                <div class="col-6 text-start">
+                                    <p>
+                                        {{ currentYearAnnualRecord.ApplicantLastName }}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="row col-12">
+                                <div class="col-6 text-end">
+                                    <p><strong>Mailing Address: </strong></p>
+                                </div>
+                                <div class="col-6 text-start">
+                                    <p>{{ currentYearAnnualRecord.ApplicantMailingAddress }}</p>
+                                    <p>
+                                        {{ currentYearAnnualRecord.ApplicantCity }},
+                                        {{ currentYearAnnualRecord.ApplicantState }}
+                                        {{ currentYearAnnualRecord.ApplicantZipCode }}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="row col-12">
+                                <div class="col-6 text-end">
+                                    <p><strong>Phone: </strong></p>
+                                </div>
+                                <div class="col-6 text-start">
+                                    <p>
+                                        {{ currentYearAnnualRecord.ApplicantPhone }}
+                                        <em *ngIf="!currentYearAnnualRecord.ApplicantPhone" class="text-muted">N/A</em>
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="row col-12">
+                                <div class="col-6 text-end">
+                                    <p><strong>Mobile: </strong></p>
+                                </div>
+                                <div class="col-6 text-start">
+                                    <p>
+                                        {{ currentYearAnnualRecord.ApplicantMobilePhone }}
+                                        <em *ngIf="!currentYearAnnualRecord.ApplicantMobilePhone" class="text-muted">N/A</em>
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="row col-12">
+                                <div class="col-6 text-end">
+                                    <p><strong>Email: </strong></p>
+                                </div>
+                                <div class="col-6 text-start">
+                                    <p>
+                                        {{ currentYearAnnualRecord.ApplicantEmail }}
+                                        <em *ngIf="!currentYearAnnualRecord.ApplicantEmail" class="text-muted">N/A</em>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <hr class="w-90" />
+                    </div>
+
+                    <div class="col-12 table-responsive mb-4">
+                        <h5>Certified Chemigation Applicators</h5>
+                        <div *ngIf="currentYearAnnualRecord.Applicators.length > 0; then hasApplicators; else noApplicators"></div>
+                        <ng-template #hasApplicators>
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Certification Number</th>
+                                        <th>Expiration</th>
+                                        <th>Home Phone</th>
+                                        <th>Mobile Phone</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr *ngFor="let applicator of currentYearAnnualRecord.Applicators">
+                                        <td>{{ applicator.ApplicatorName }}</td>
+                                        <td>{{ applicator.CertificationNumber }}</td>
+                                        <td>{{ applicator.ExpirationYear }}</td>
+                                        <td>{{ applicator.HomePhone }}</td>
+                                        <td>{{ applicator.MobilePhone }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </ng-template>
+                        <ng-template #noApplicators>No certified chemigation applicators on file.</ng-template>
+                    </div>
+
+                    <div class="col-12">
+                        <hr class="w-90" />
+                    </div>
+
+                    <div class="col-12 table-responsive mb-4">
+                        <h5>Applied Chemicals</h5>
+                        <div *ngIf="currentYearAnnualRecord.ChemicalFormulations.length > 0; then hasChemicalFormulations; else noChemicalFormulations"></div>
+                        <ng-template #hasChemicalFormulations>
+                            <p>Chemicals that were used in the chemigation system in the past year</p>
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Formulation</th>
+                                        <th class="text-end">Total Applied</th>
+                                        <th>Unit</th>
+                                        <th class="text-end">Acres Treated</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr *ngFor="let chemicalFormulation of currentYearAnnualRecord.ChemicalFormulations">
+                                        <td>{{ chemicalFormulation.ChemicalFormulationName }}</td>
+                                        <td class="text-end">{{ chemicalFormulation.TotalApplied | number: "1.0-1" }}</td>
+                                        <td>{{ chemicalFormulation.ChemicalUnitName }}</td>
+                                        <td class="text-end">{{ chemicalFormulation.AcresTreated | number: "1.0-1" }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </ng-template>
+                        <ng-template #noChemicalFormulations>No chemicals were used in the chemigation system in the past year.</ng-template>
+                    </div>
+
+                    <div class="col-12">
+                        <hr class="w-90" />
+                    </div>
+
+                    <div class="col-12 mb-4">
+                        <h5>Inspections</h5>
+                        <div *ngIf="currentYearAnnualRecord.Inspections.length > 0; then hasInspections; else noInspections"></div>
+                        <ng-template #hasInspections>
+                            <p>Chemigation inspections for the current record year</p>
+
+                            <div class="row col-2 float-end">
+                                <a
+                                    class="btn btn-zybach btn-md float-end mb-3 me-3"
+                                    routerLink="/chemigation-permits/{{ chemigationPermit?.ChemigationPermitNumber }}/{{ yearToDisplay }}/add-inspection">
+                                    <span class="fas fa-plus"></span> Add Inspection
+                                </a>
+                            </div>
+
+                            <div class="row col-12"></div>
+
+                            <div class="col-12">
+                                <nav>
+                                    <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                                        <a
+                                            [ngClass]="{ 'nav-link': true, 'active': isFirst }"
+                                            *ngFor="let inspection of getInspections(); first as isFirst"
+                                            id="inspection-{{ inspection.ChemigationInspectionID }}"
+                                            data-bs-toggle="tab"
+                                            href="#nav-inspection-{{ inspection.ChemigationInspectionID }}"
+                                            role="tab">
+                                            <strong>{{ inspection.InspectionDate | date: "shortDate" }} - {{ inspection.ChemigationInspectionStatusName }}</strong>
+                                        </a>
+                                    </div>
+                                </nav>
+                            </div>
+
+                            <div class="tab-content col-12" id="nav-tabContent">
+                                <div
+                                    [ngClass]="{ 'tab-pane': true, 'fade': true, 'show': true, 'active': isFirst }"
+                                    *ngFor="let inspection of getInspections(); first as isFirst"
+                                    id="nav-inspection-{{ inspection.ChemigationInspectionID }}"
+                                    role="tabpanel">
+                                    <div class="row col-12 mt-4">
+                                        <div class="row col-6">
+                                            <div class="row col-12">
+                                                <div class="col-6 text-end">
+                                                    <p><strong>Date: </strong></p>
+                                                </div>
+                                                <div class="col-6 text-start">
+                                                    <p>
+                                                        {{ inspection.InspectionDate | date: "shortDate" }}
+                                                        <em *ngIf="!inspection.InspectionDate" class="text-muted">N/A</em>
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            <div class="row col-12">
+                                                <div class="col-6 text-end">
+                                                    <p><strong>Inspection Type: </strong></p>
+                                                </div>
+                                                <div class="col-6 text-start">
+                                                    <p>
+                                                        {{ inspection.ChemigationInspectionTypeName }}
+                                                        <em *ngIf="!inspection.ChemigationInspectionTypeName" class="text-muted">N/A</em>
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            <div class="row col-12">
+                                                <div class="col-6 text-end">
+                                                    <p><strong>Inspector: </strong></p>
+                                                </div>
+                                                <div class="col-6 text-start">
+                                                    <p>
+                                                        {{ inspection.Inspector?.FullNameLastFirst }}
+                                                        <em *ngIf="!inspection.Inspector" class="text-muted">N/A</em>
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            <div class="row col-12">
+                                                <div class="col-6 text-end">
+                                                    <p><strong>Status: </strong></p>
+                                                </div>
+                                                <div class="col-6 text-start">
+                                                    <p>{{ inspection.ChemigationInspectionStatusName }}</p>
+                                                </div>
+                                            </div>
+
+                                            <div class="row col-12">
+                                                <div class="col-6 text-end">
+                                                    <p><strong>Failure Reason: </strong></p>
+                                                </div>
+                                                <div class="col-6 text-start">
+                                                    <p>
+                                                        {{ inspection.ChemigationInspectionFailureReasonName }}
+                                                        <em *ngIf="!inspection.ChemigationInspectionFailureReasonName" class="text-muted">N/A</em>
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            <div class="row col-12">
+                                                <div class="col-6 text-end">
+                                                    <p><strong>Inspection Notes: </strong></p>
+                                                </div>
+                                                <div class="col-6 text-start">
+                                                    <p>
+                                                        <em *ngIf="!inspection.InspectionNotes" class="text-muted">N/A</em>
+                                                        {{ inspection.InspectionNotes }}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row col-6">
+                                            <div class="row col-12">
+                                                <div class="col-6 text-end">
+                                                    <p><strong>Mainline Check Valve: </strong></p>
+                                                </div>
+                                                <div class="col-6 text-start">
+                                                    <p>
+                                                        {{ inspection.ChemigationMainlineCheckValveName }}
+                                                        <em *ngIf="!inspection.ChemigationMainlineCheckValveName" class="text-muted">N/A</em>
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            <div class="row col-12">
+                                                <div class="col-6 text-end">
+                                                    <p><strong>Low Pressure Valve: </strong></p>
+                                                </div>
+                                                <div class="col-6 text-start">
+                                                    <p>
+                                                        {{ inspection.ChemigationLowPressureValveName }}
+                                                        <em *ngIf="!inspection.ChemigationLowPressureValveName" class="text-muted">N/A</em>
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            <div class="row col-12">
+                                                <div class="col-6 text-end">
+                                                    <p><strong>Chemigation Injection Valve: </strong></p>
+                                                </div>
+                                                <div class="col-6 text-start">
+                                                    <p>
+                                                        {{ inspection.ChemigationInjectionValveName }}
+                                                        <em *ngIf="!inspection.ChemigationInjectionValveName" class="text-muted">N/A</em>
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            <div class="row col-12">
+                                                <div class="col-6 text-end">
+                                                    <p><strong>Interlock Type: </strong></p>
+                                                </div>
+                                                <div class="col-6 text-start">
+                                                    <p>
+                                                        {{ inspection.ChemigationInterlockTypeName }}
+                                                        <em *ngIf="!inspection.ChemigationInterlockTypeName" class="text-muted">N/A</em>
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            <div class="row col-12">
+                                                <div class="col-6 text-end">
+                                                    <p><strong>Vacuum Relief Valve? </strong></p>
+                                                </div>
+                                                <div class="col-6 text-start">
+                                                    <p>{{ inspection.HasVacuumReliefValve ? "Yes" : "No" }}</p>
+                                                </div>
+                                            </div>
+
+                                            <div class="row col-12">
+                                                <div class="col-6 text-end">
+                                                    <p><strong>Inspection Port? </strong></p>
+                                                </div>
+                                                <div class="col-6 text-start">
+                                                    <p>{{ inspection.HasInspectionPort ? "Yes" : "No" }}</p>
+                                                </div>
+                                            </div>
+
+                                            <div class="row col-12">
+                                                <div class="col-6 text-end">
+                                                    <p><strong>Tillage: </strong></p>
+                                                </div>
+                                                <div class="col-6 text-start">
+                                                    <p>
+                                                        {{ inspection.TillageName }}
+                                                        <em *ngIf="!inspection.TillageName" class="text-muted">N/A</em>
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            <div class="row col-12">
+                                                <div class="col-6 text-end">
+                                                    <p><strong>Crop Type: </strong></p>
+                                                </div>
+                                                <div class="col-6 text-start">
+                                                    <p>
+                                                        {{ inspection.CropTypeName }}
+                                                        <em *ngIf="!inspection.CropTypeName" class="text-muted">N/A</em>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div *ngIf="isFirst" class="row mt-3 me-3 pl-3">
+                                            <a class="btn btn-zybach btn-md mt-3 me-3 col-2" routerLink="/chemigation-inspections/{{ inspection.ChemigationInspectionID }}">
+                                                <span class="fas fa-edit"></span> Edit Inspection
+                                            </a>
+
+                                            <button
+                                                type="button"
+                                                class="btn btn-zybach btn-md mt-3 me-3 col-2"
+                                                [disabled]="isPerformingAction"
+                                                (click)="launchDeleteInspectionModal(inspection.ChemigationInspectionID)">
+                                                <span *ngIf="isLoadingSubmit" class="fa fa-spinner loading-spinner"></span>
+                                                <span class="fas fa-trash"></span> Delete Inspection
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </ng-template>
+
+                        <ng-template #noInspections>
+                            <p>No inspection records found for this year.</p>
+                            <div class="col-4 float-end">
+                                <a
+                                    class="btn btn-zybach btn-md float-end"
+                                    routerLink="/chemigation-permits/{{ chemigationPermit?.ChemigationPermitNumber }}/{{ yearToDisplay }}/add-inspection">
+                                    <span class="fas fa-plus"></span> Add Inspection
+                                </a>
+                            </div>
+                        </ng-template>
+                    </div>
+                </div>
+                <div class="row" *ngIf="!chemigationPermit">
+                    <div class="col text-center">
+                        <span class="fas fa-spinner loading-spinner"></span>
+                        <p>Loading...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<ng-template #deleteInspectionModal let-modal>
+    <div class="modal-header">
+        <h4 class="modal-title">Confirm Delete</h4>
+        <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body">Are you sure you want to delete this inspection?</div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-zybach btn-sm" [disabled]="isPerformingAction" (click)="deleteInspectionByID()">
+            <span *ngIf="isLoadingSubmit" class="fa fa-spinner loading-spinner"></span>
+            Confirm
+        </button>
+        <button type="button" class="btn btn-secondary btn-sm" (click)="modal.close('Cancel click')" [disabled]="isPerformingAction">Cancel</button>
+    </div>
+</ng-template>

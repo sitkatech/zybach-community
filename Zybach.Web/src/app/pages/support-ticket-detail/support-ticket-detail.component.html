@@ -1,0 +1,216 @@
+<nav aria-label="breadcrumb" *ngIf="supportTicket">
+    <ol class="breadcrumb p-3">
+        <li class="breadcrumb-item">
+            <a routerLink="/support-tickets">Support Tickets</a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">Support Ticket #{{ supportTicket?.SupportTicketID }}: {{ supportTicket.SupportTicketTitle }}</li>
+    </ol>
+</nav>
+<app-alert-display></app-alert-display>
+<div class="container">
+    <div class="row" *ngIf="supportTicket">
+        <div class="col-12">
+            <h2 class="d-inline-block">Support Ticket #{{ supportTicket.SupportTicketID }}: {{ supportTicket.SupportTicketTitle }}</h2>
+        </div>
+
+        <div class="row container">
+            <div class="col-12 col-sm-6 label"><strong>Status: </strong></div>
+            <div class="col-12 col-sm-6">{{ supportTicket.Status.SupportTicketStatusDisplayName }}</div>
+            <div class="col-12 col-sm-6 label"><strong>Priority: </strong></div>
+            <div class="col-12 col-sm-6">{{ supportTicket.Priority.SupportTicketPriorityDisplayName }}</div>
+            <div class="col-12 col-sm-6 label"><strong>Assigned To: </strong></div>
+            <div class="col-12 col-sm-6">
+                {{ supportTicket.AssigneeUser?.FullName }}
+                <em *ngIf="!supportTicket.AssigneeUser" class="text-muted">N/A</em>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4" *ngIf="supportTicket">
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header align-items-center">
+                    Ticket Details
+                    <div class="float-end">
+                        <a class="btn btn-zybach btn-sm" routerLink="/support-tickets/{{ supportTicket?.SupportTicketID }}/edit"> <span class="fas fa-edit"></span> Edit </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-xl-6">
+                            <div class="row mt-2">
+                                <div class="col-xl-6 col-sm-4 text-sm-end">
+                                    <strong>Created By: </strong>
+                                </div>
+                                <div class="col-xl-6 col-sm-8">
+                                    {{ supportTicket.CreatorUser.FullName }}
+                                </div>
+                            </div>
+
+                            <div class="row mt-2">
+                                <div class="col-xl-6 col-sm-4 text-sm-end">
+                                    <strong>Date Created: </strong>
+                                </div>
+                                <div class="col-xl-6 col-sm-8">
+                                    {{ supportTicket.DateCreated | date: "short" }}
+                                </div>
+                            </div>
+
+                            <div class="row mt-2">
+                                <div class="col-xl-6 col-sm-4 text-sm-end">
+                                    <strong>Last Updated: </strong>
+                                </div>
+                                <div class="col-xl-6 col-sm-8">
+                                    {{ supportTicket.DateUpdated | date: "short" }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-xl-6">
+                            <div class="row mt-2">
+                                <div class="col-xl-6 col-sm-4 text-sm-end">
+                                    <strong> <field-definition [fieldDefinitionType]="'WellRegistrationNumber'" labelOverride="Well Reg #"> </field-definition>: </strong>
+                                </div>
+                                <div class="col-xl-6 col-sm-8">
+                                    <a routerLink="/wells/{{ supportTicket.Well.WellID }}">
+                                        {{ supportTicket.Well.WellRegistrationID }}
+                                    </a>
+                                </div>
+                            </div>
+
+                            <div class="row mt-2">
+                                <div class="col-xl-6 col-sm-4 text-sm-end">
+                                    <strong>Sensor: </strong>
+                                </div>
+                                <div class="col-xl-6 col-sm-8">
+                                    <a routerLink="/sensors/{{ supportTicket.Sensor?.SensorID }}" *ngIf="supportTicket.Sensor">
+                                        {{ supportTicket.Sensor?.SensorName }}
+                                    </a>
+                                    <em *ngIf="!supportTicket.Sensor" class="text-muted"> N/A </em>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-xl-3 col-sm-4 text-sm-end">
+                            <strong>Description: </strong>
+                        </div>
+                        <div class="col-xl-9 col-sm-8">
+                            <em *ngIf="!supportTicket.SupportTicketDescription" class="text-muted">N/A</em>
+                            {{ supportTicket.SupportTicketDescription }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header align-items-center">
+                    Comments
+                    <div class="float-end">
+                        <a class="btn btn-zybach btn-sm" routerLink="/support-tickets/{{ supportTicket?.SupportTicketID }}/add-comment">
+                            <span class="fas fa-plus"></span> Add Comment
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body" id="comment-display">
+                    <div class="row" *ngFor="let ticketComment of supportTicket?.Comments; let last = last">
+                        <div class="col-sm-12">
+                            <div class="row align-items-end">
+                                <div class="col-10">
+                                    <strong> {{ ticketComment.CreatorUser.FullName }} on {{ ticketComment.DateUpdated | date: "short" }} </strong>
+                                </div>
+                                <div class="col-2 text-center">
+                                    <button
+                                        class="btn btn-zybach btn-sm"
+                                        (click)="launchDeleteModal(deleteCommentModal, ticketComment.SupportTicketCommentID)"
+                                        [hidden]="!currentUserIsTicketOwner()">
+                                        <span class="fa fa-trash"></span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="m-2 mt-3">
+                                {{ ticketComment.CommentNotes }}
+                            </div>
+
+                            <hr *ngIf="!last" />
+                        </div>
+                    </div>
+                    <ng-container *ngIf="supportTicket?.Comments?.length == 0">
+                        <em>No comments to display.</em>
+                    </ng-container>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <div class="card">
+                <div class="card-header align-items-center">Notifications</div>
+                <div class="card-body" id="notification-display">
+                    <ng-container *ngFor="let notification of notifications; let last = last">
+                        <div class="row">
+                            <div class="col-3 text-end">
+                                <p><strong>Date:</strong></p>
+                            </div>
+                            <div class="col-9">
+                                <p>{{ notification.SentDate | date: "short" }}</p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-3 text-end">
+                                <p><strong>To/CC:</strong></p>
+                            </div>
+                            <div class="col-9">
+                                <p>{{ notification.EmailAddresses }}</p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-3 text-end">
+                                <p><strong>Subject:</strong></p>
+                            </div>
+                            <div class="col-9">
+                                <p>{{ notification.EmailSubject }}</p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-3 text-end">
+                                <p><strong>Body:</strong></p>
+                            </div>
+                            <div class="col-9" [innerHtml]="notification.EmailBody"></div>
+                        </div>
+                        <hr *ngIf="!last" />
+                    </ng-container>
+                    <ng-container *ngIf="notifications?.length == 0">
+                        <em>No notifications to display.</em>
+                    </ng-container>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<ng-template #deleteCommentModal let-modal>
+    <div class="modal-header bg-secondary">
+        <h5 class="modal-title" id="deleteCommentModalTitle">Delete Comment</h5>
+        <button type="button" class="close" aria-label="Close" (click)="modal.close('Cross click')">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body">
+        <p>
+            Are you sure you wish to delete this comment?
+            <br />
+            This action cannot be undone
+        </p>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-danger btn-md" (click)="deleteComment()">
+                <span *ngIf="isLoadingDelete" class="fa fa-spinner loading-spinner"></span>
+                Delete
+            </button>
+            <button type="button" class="btn btn-secondary btn-md" (click)="modal.close('Cancel click')">Cancel</button>
+        </div>
+    </div>
+</ng-template>

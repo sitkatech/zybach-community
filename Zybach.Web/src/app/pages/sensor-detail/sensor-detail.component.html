@@ -1,0 +1,417 @@
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb p-3">
+        <li class="breadcrumb-item">
+            <a routerLink="/sensors">Sensors</a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">{{ sensor?.SensorName }}</li>
+    </ol>
+</nav>
+<div style="width: fit-content; margin: auto" *ngIf="!sensor">
+    <span class="fa fa-spinner loading-spinner"></span>
+</div>
+<div class="container" *ngIf="sensor">
+    <ngb-alert *ngIf="openSupportTickets?.length > 0" [type]="'warning'" [dismissible]="false">
+        <p *ngFor="let ticket of openSupportTickets">
+            This sensor has an active trouble ticket
+            <a routerLink="/support-tickets/{{ ticket.SupportTicketID }}">#{{ ticket.SupportTicketID }}: {{ ticket.SupportTicketTitle }}</a> opened by
+            {{ ticket.CreatorUser.FullName }}<span *ngIf="ticket.AssigneeUser !== null"> and currently assigned to {{ ticket.AssigneeUser.FullName }}</span
+            >. Follow the <a routerLink="/support-tickets/{{ ticket.SupportTicketID }}">link</a> to view more details.
+        </p>
+    </ngb-alert>
+    <app-alert-display></app-alert-display>
+
+    <div class="row mt-4">
+        <div class="col-5">
+            <div class="card">
+                <div class="card-header">
+                    Sensor Info
+                    <a class="btn btn-zybach btn-sm float-end" routerLink="/sensors/{{ sensor?.SensorID }}/edit"> Edit Sensor<i class="fas fa-edit ms-1"></i> </a>
+                </div>
+                <div class="card-body text-center" *ngIf="sensor">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="row">
+                                <div class="col-12 col-sm-6 label">
+                                    <strong> <field-definition [fieldDefinitionType]="'WellRegistrationNumber'"> </field-definition>: </strong>
+                                </div>
+                                <div class="col-12 col-sm-6 text-start">
+                                    <a routerLink="/wells/{{ sensor.WellID }}">{{ sensor.WellRegistrationID }}</a>
+                                </div>
+                                <div class="col-12 col-sm-6 mt-1 label">
+                                    <strong> <field-definition [fieldDefinitionType]="'SensorType'"> </field-definition>: </strong>
+                                </div>
+                                <div class="col-12 col-sm-6 mt-1 text-start">{{ sensor.SensorTypeName }}</div>
+
+                                <div class="col-12 col-sm-6 mt-1 label">
+                                    <strong> Model Number: </strong>
+                                </div>
+                                <div class="col-12 col-sm-6 mt-1 text-start">{{ sensor.SensorModelNumber }}</div>
+
+                                <div class="col-12 col-sm-6 mt-1 label">
+                                    <strong> <field-definition [fieldDefinitionType]="'SensorLastMessageAgeHours'"> </field-definition>: </strong>
+                                </div>
+                                <div class="col-12 col-sm-6 mt-1 text-start">
+                                    <span *ngIf="sensor.LastMessageAgeInHours != null; else notApplicable">
+                                        {{ sensor.LastMessageAgeInHours }}
+                                    </span>
+                                </div>
+                                <div class="col-12 col-sm-6 mt-1 label">
+                                    <strong> <field-definition [fieldDefinitionType]="'SensorLastVoltageReading'"> </field-definition>: </strong>
+                                </div>
+                                <div class="col-12 col-sm-6 mt-1 text-start">{{ sensor.LastVoltageReading | number: "1.0-0" }}</div>
+                                <div class="col-12 col-sm-6 mt-1 label">
+                                    <strong> <field-definition [fieldDefinitionType]="'SensorLastVoltageReadingDate'"> </field-definition>: </strong>
+                                </div>
+                                <div class="col-12 col-sm-6 mt-1 text-start">{{ sensor.LastVoltageReadingDate | date: "MM/dd/yyyy" }}</div>
+                                <div class="col-12 col-sm-6 mt-1 label">
+                                    <strong> <field-definition [fieldDefinitionType]="'SensorFirstReadingDate'"> </field-definition>: </strong>
+                                </div>
+                                <div class="col-12 col-sm-6 mt-1 text-start">{{ sensor.FirstReadingDate | date: "MM/dd/yyyy" }}</div>
+                                <div class="col-12 col-sm-6 mt-1 label">
+                                    <strong> <field-definition [fieldDefinitionType]="'SensorLastReadingDate'"> </field-definition>: </strong>
+                                </div>
+                                <div class="col-12 col-sm-6 mt-1 text-start">{{ sensor.LastReadingDate | date: "MM/dd/yyyy" }}</div>
+                                <div class="col-12 col-sm-6 mt-1 label">
+                                    <strong> <field-definition [fieldDefinitionType]="'SensorStatus'"> </field-definition>: </strong>
+                                </div>
+                                <div class="col-12 col-sm-6 mt-1 text-start">
+                                    <div class="btn-group btn-group-toggle float-start">
+                                        <label class="btn btn-toggle btn-sm btn-zybach" [ngClass]="sensor.IsActive ? 'active' : ''">
+                                            <input type="radio" name="sensorIsActive" (click)="launchConfirmStatusModal()" [disabled]="sensor.IsActive" />
+                                            Enabled
+                                        </label>
+                                        <label class="btn btn-toggle btn-sm btn-zybach" [ngClass]="!sensor.IsActive ? 'active' : ''">
+                                            <input type="radio" name="sensorIsActive" (click)="launchConfirmStatusModal()" [disabled]="!sensor.IsActive" />
+                                            Disabled
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-sm-6 mt-1 label">
+                                    <strong> <field-definition [fieldDefinitionType]="'SensorRetirementDate'"></field-definition>: </strong>
+                                </div>
+                                <div class="col-12 col-sm-6 mt-1 text-start">
+                                    <span *ngIf="sensor?.RetirementDate; else notApplicable">{{ sensor?.RetirementDate | date: "MM/dd/yyyy" }}</span>
+                                </div>
+
+                                <ng-container *ngIf="isContinuityMeter() && sensor.IsActive">
+                                    <div class="col-12">
+                                        <hr />
+                                    </div>
+                                    <div class="col-12 col-sm-6 mt-1 label">
+                                        <strong><field-definition [fieldDefinitionType]="'ContinuityMeterStatus'" labelOverride="Always On/Off"></field-definition>:</strong>
+                                    </div>
+                                    <div class="col-6 col-sm-0 text-start">
+                                        <span *ngIf="isContinuityMeter(); else notApplicable">{{ sensor?.ContinuityMeterStatus?.ContinuityMeterStatusDisplayName }}</span>
+                                    </div>
+
+                                    <ng-container *ngIf="!isReportingNormally()">
+                                        <div class="col-12 col-sm-6 mt-1 label">
+                                            <strong>Last {{ isAlwaysOn() ? "Off" : "On" }} Reading Date:</strong>
+                                        </div>
+                                        <div class="col-6 col-sm-0 text-start">
+                                            <span *ngIf="isAlwaysOn()">{{ sensor?.LastOffReadingDate | date: "short" }}</span>
+                                            <span *ngIf="!isAlwaysOn()">{{ sensor?.LastOnReadingDate | date: "short" }}</span>
+                                        </div>
+
+                                        <div class="col-12 col-sm-6 mt-1 label"><strong> Always On/Off Status: </strong></div>
+                                        <div class="col-12 col-sm-6 mt-1 text-start">
+                                            <div class="btn-group btn-group-toggle float-start">
+                                                <label class="btn btn-toggle btn-sm btn-zybach" [ngClass]="!sensor.SnoozeStartDate ? 'active' : ''">
+                                                    <input type="radio" name="reporting" (click)="updateSensorSnooze(false)" [disabled]="!sensor.SnoozeStartDate" />
+                                                    Reporting
+                                                </label>
+                                                <label class="btn btn-toggle btn-sm btn-zybach" [ngClass]="sensor.SnoozeStartDate ? 'active' : ''">
+                                                    <input type="radio" name="snoozed" (click)="updateSensorSnooze(true)" [disabled]="sensor.SnoozeStartDate" />
+                                                    Snoozed
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <ng-container *ngIf="sensor?.SnoozeStartDate">
+                                            <div class="col-12 col-sm-6 mt-1 label"><strong> Snoozed On: </strong></div>
+                                            <div class="col-12 col-sm-6 mt-1 text-start">{{ sensor?.SnoozeStartDate | date: "short" }}</div>
+                                        </ng-container>
+                                    </ng-container>
+                                </ng-container>
+
+                                <ng-template #notApplicable>
+                                    <em class="text-muted">N/A</em>
+                                </ng-template>
+                            </div>
+                        </div>
+                    </div>
+
+                    <ng-container *ngIf="!sensor">
+                        <span class="fas fa-spinner loading-spinner"></span>
+                        <p>Loading...</p>
+                    </ng-container>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-7">
+            <div class="card">
+                <div class="card-header">Installation Details</div>
+                <div class="card-body">
+                    <div class="col-12">
+                        <div class="row">
+                            <div class="col-12 col-sm-6 mt-1 label">
+                                <strong> Installation Date: </strong>
+                            </div>
+                            <div class="col-12 col-sm-6 mt-1 text-start">
+                                <span *ngIf="sensor.InstallationDate">
+                                    {{ sensor.InstallationDate | date: "MM/dd/yyyy" }}
+                                </span>
+                                <span style="font-style: italic" *ngIf="!sensor.InstallationDate"> Not Set </span>
+                            </div>
+
+                            <div class="col-12 col-sm-6 mt-1 label">
+                                <strong> Installation Organization: </strong>
+                            </div>
+                            <div class="col-12 col-sm-6 mt-1 text-start">
+                                <span *ngIf="sensor.InstallationOrganization">
+                                    {{ sensor.InstallationOrganization }}
+                                </span>
+                                <span style="font-style: italic" *ngIf="!sensor.InstallationOrganization"> Not Set </span>
+                            </div>
+
+                            <div class="col-12 col-sm-6 mt-1 label">
+                                <strong> Installation Initials: </strong>
+                            </div>
+                            <div class="col-12 col-sm-6 mt-1 text-start">
+                                <span *ngIf="sensor.InstallationInstallerInitials">
+                                    {{ sensor.InstallationInstallerInitials }}
+                                </span>
+                                <span style="font-style: italic" *ngIf="!sensor.InstallationInstallerInitials"> Not Set </span>
+                            </div>
+
+                            <div class="col-12 col-sm-6 mt-1 label">
+                                <strong> Installation Comments: </strong>
+                            </div>
+                            <div class="col-12 col-sm-6 mt-1 text-start">
+                                <span *ngIf="sensor.InstallationComments">
+                                    {{ sensor.InstallationComments }}
+                                </span>
+                                <span style="font-style: italic" *ngIf="!sensor.InstallationComments"> Not Set </span>
+                            </div>
+
+                            <div class="col-12 col-sm-6 mt-1 label">
+                                <strong> Installation Photo: </strong>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12 col-sm-6 mt-1" style="overflow: auto; width: 100%">
+                                <div *ngIf="photoURL && fileLoading" style="width: fit-content; margin: auto">
+                                    <span class="fa fa-spinner loading-spinner"></span>
+                                </div>
+
+                                <div *ngIf="photoURL && !fileLoading && !displayPhotoWorkflow" style="text-align: center">
+                                    <img [src]="photoURL" alt="Sensor Photo" width="auto" style="max-height: 300px" />
+                                </div>
+
+                                <div class="photo-workflow-container">
+                                    <div *ngIf="!displayPhotoWorkflow">
+                                        <button class="btn btn-zybach" (click)="displayPhotoWorkflow = true">Change Photo <i class="fas fa-image ms-1"></i></button>
+                                    </div>
+                                    <div *ngIf="displayPhotoWorkflow">
+                                        <input type="file" id="installationPhoto" name="installationPhoto" accept="image/*" (change)="onFileChange($event)" />
+                                        <div class="photo-workflow-container-buttons">
+                                            <button class="btn btn-zybach" (click)="uploadPhoto()" [disabled]="!imageUploadDto">Upload Photo</button>
+                                            <button class="btn btn-zybach btn-secondary" (click)="displayPhotoWorkflow = false">Cancel</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" *ngIf="sensor.SensorTypeID == wellPressureSensorTypeID" style="margin-top: 1rem">
+                <div class="card-header">Pressure Sensor</div>
+                <div class="card-body">
+                    <div class="col-12">
+                        <div class="row">
+                            <div class="col-12 col-sm-6 mt-1 label">
+                                <strong> Well Depth: </strong>
+                            </div>
+                            <div class="col-12 col-sm-6 mt-1 text-start">
+                                <span *ngIf="sensor.WellDepth">
+                                    {{ sensor.WellDepth }}
+                                </span>
+                                <span style="font-style: italic" *ngIf="!sensor.WellDepth"> Not Set </span>
+                            </div>
+
+                            <div class="col-12 col-sm-6 mt-1 label">
+                                <strong> Install Depth: </strong>
+                            </div>
+                            <div class="col-12 col-sm-6 mt-1 text-start">
+                                <span *ngIf="sensor.InstallDepth">
+                                    {{ sensor.InstallDepth }}
+                                </span>
+                                <span style="font-style: italic" *ngIf="!sensor.InstallDepth"> Not Set </span>
+                            </div>
+
+                            <div class="col-12 col-sm-6 mt-1 label">
+                                <strong> Cable Length: </strong>
+                            </div>
+                            <div class="col-12 col-sm-6 mt-1 text-start">
+                                <span *ngIf="sensor.CableLength">
+                                    {{ sensor.CableLength }}
+                                </span>
+                                <span style="font-style: italic" *ngIf="!sensor.CableLength"> Not Set </span>
+                            </div>
+
+                            <div class="col-12 col-sm-6 mt-1 label">
+                                <strong> Water Level: </strong>
+                            </div>
+                            <div class="col-12 col-sm-6 mt-1 text-start">
+                                <span *ngIf="sensor.WaterLevel">
+                                    {{ sensor.WaterLevel }}
+                                </span>
+                                <span style="font-style: italic" *ngIf="!sensor.WaterLevel"> Not Set </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" *ngIf="sensor.SensorTypeID == flowMeterTypeID" style="margin-top: 1rem">
+                <div class="card-header">Flow Meter Sensor</div>
+                <div class="card-body">
+                    <div class="col-12">
+                        <div class="row">
+                            <div class="col-12 col-sm-6 mt-1 label">
+                                <strong> Flow Meter Reading: </strong>
+                            </div>
+                            <div class="col-12 col-sm-6 mt-1 text-start">
+                                <span *ngIf="sensor.FlowMeterReading">
+                                    {{ sensor.FlowMeterReading }}
+                                </span>
+                                <span style="font-style: italic" *ngIf="!sensor.FlowMeterReading"> Not Set </span>
+                            </div>
+
+                            <!-- Pipe Diameter -->
+                            <div class="col-12 col-sm-6 mt-1 label">
+                                <strong> Pipe Diameter: </strong>
+                            </div>
+                            <div class="col-12 col-sm-6 mt-1 text-start">
+                                <span *ngIf="sensor.PipeDiameterDisplayName">
+                                    {{ sensor.PipeDiameterDisplayName }}
+                                </span>
+                                <span style="font-style: italic" *ngIf="!sensor.PipeDiameterDisplayName"> Not Set </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div [ngClass]="isDisplayingSensorAnomalyPanel ? 'col-sm-9' : 'col-sm-12'">
+                <div class="card">
+                    <div class="card-header">
+                        Sensor Data Readings
+                        <a routerLink="/sensors/{{ sensor.SensorID }}/new-support-ticket" class="btn btn-sm btn-zybach float-end">
+                            <span class="fas fa-plus"></span> New Support Ticket</a
+                        >
+                        <a *ngIf="!noTimeSeriesData" class="btn btn-sm btn-zybach float-end me-2" (click)="displaySensorAnomalyPanel()">
+                            <span class="fas fa-plus"></span> Add Sensor Anomaly</a
+                        >
+                    </div>
+                    <div class="card-body">
+                        <zybach-sensor-chart [(sensorChartData)]="sensorChartData"></zybach-sensor-chart>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-3" *ngIf="isDisplayingSensorAnomalyPanel">
+                <div class="card">
+                    <div class="card-header">Create Anomaly Report</div>
+                    <div class="card-body">
+                        <div>
+                            <span class="fw-bold required">Start Date</span>
+                            <div class="input-group mt-1">
+                                <input
+                                    class="form-control"
+                                    placeholder="Select a start date"
+                                    [(ngModel)]="sensorAnomalyModel.StartDate"
+                                    ngbDatepicker
+                                    #d1="ngbDatepicker"
+                                    required />
+                                <div class="input-group-append">
+                                    <button class="btn btn-secondary" (click)="d1.toggle()" type="button">
+                                        <span class="far fa-calendar me-2 col-1"> </span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <span class="fw-bold required">End Date</span>
+                            <div class="input-group mt-1">
+                                <input class="form-control" placeholder="Select an end date" [(ngModel)]="sensorAnomalyModel.EndDate" ngbDatepicker #d2="ngbDatepicker" required />
+                                <div class="input-group-append">
+                                    <button class="btn btn-secondary" (click)="d2.toggle()" type="button">
+                                        <span class="far fa-calendar me-2 col-1"></span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <span class="fw-bold">Notes</span>
+                            <textarea class="form-control" style="height: 100px" [(ngModel)]="sensorAnomalyModel.Notes"> </textarea>
+                        </div>
+                        <div class="col"><i class="fas fa-bolt"></i> Required field</div>
+                        <div class="row mt-3">
+                            <div class="col-auto ms-auto">
+                                <button class="btn btn-zybach" [disabled]="isLoadingSubmit" (click)="submitSensorAnomaly()">
+                                    <span *ngIf="isLoadingSubmit" class="fa fa-spinner loading-spinner"></span>
+                                    Save
+                                </button>
+                                <button class="btn btn-secondary ms-1" [disabled]="isLoadingSubmit" (click)="closeSensorAnomalyPanel()">Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <ng-template #confirmStatusChangeModal let-modal>
+        <div class="modal-header bg-secondary">
+            <h5 class="modal-title" id="confirmStatusChangeModalTitle">
+                {{ sensor.IsActive ? "Disable" : "Enable" }}
+                Sensor
+            </h5>
+            <button type="button" class="close" aria-label="Close" (click)="modal.close('Cross click')">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="modal-body">
+            <ng-container *ngIf="sensor.IsActive; else enableSensor">
+                <label for="dp1">Select a Retirement Date:</label>
+                <div class="input-group">
+                    <input class="form-control" name="dp1" id="dp1" placeholder="yyyy-mm-dd" [(ngModel)]="retirementDate" ngbDatepicker #d1="ngbDatepicker" />
+                    <div class="input-group-append">
+                        <button class="btn btn-zybach far fa-calendar input-group-append" (click)="d1.toggle()" type="button"></button>
+                    </div>
+                </div>
+            </ng-container>
+
+            <ng-template #enableSensor>
+                <p>
+                    Are you sure you want to re-enable sensor {{ sensor.SensorName }}? This will delete the current Retirement Date of
+                    {{ sensor.RetirementDate | date: "MM/dd/yyyy" }}.
+                </p>
+            </ng-template>
+
+            <p class="mt-4"><em>Reminder: Please review the data and create anomaly reports if needed for this sensor.</em></p>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-zybach" (click)="toggleIsActive(!sensor.IsActive)">
+                    <span *ngIf="isLoadingSubmit" class="fa fa-spinner loading-spinner"></span>
+                    {{ sensor.IsActive ? "Disable" : "Enable" }}
+                </button>
+                <button type="button" class="btn btn-secondary" (click)="modal.close('Cancel click')">Cancel</button>
+            </div>
+        </div>
+    </ng-template>
+</div>

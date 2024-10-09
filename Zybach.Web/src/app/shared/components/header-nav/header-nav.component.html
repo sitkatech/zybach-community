@@ -1,0 +1,150 @@
+<nav class="navbar navbar-expand-xl justify-content-start navbar-zybach logoPadding navbar-dark navbar-responsive-header">
+    <a routerLink="/" routerLinkActive="active" class="navbar-brand nav-link"> Groundwater Managers Platform </a>
+    <button class="navbar-toggler ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#navbar2" (click)="toggleCurrentPageHeader()">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+</nav>
+
+<nav class="navbar navbar-expand-xl justify-content-start navbar-zybach-secondary logoPadding">
+    <a href="https://tpnrd.org" class="navbar-logo pt-0" target="_blank" style="float: left; position: absolute; z-index: 1025; left: 0; top: 0">
+        <img src="assets/main/logos/logo_crop.png" />
+    </a>
+
+    <div class="flex-row navbar-collapse collapse" id="navbar2">
+        <ul class="navbar-nav ps-2">
+            <li class="nav-item" routerLinkActive="active" *ngIf="!isAuthenticated()">
+                <a href="javascript:void(0);" (click)="login()" routerLinkActive="active" class="nav-link">Sign In</a>
+            </li>
+            <li class="nav-item dropdown welcomeUser" routerLinkActive="active" *ngIf="isAuthenticated()">
+                <a href="#" class="nav-link dropdown-toggle pe-3" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Welcome {{ getUserName() }}
+                </a>
+                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+                    <a routerLink="/help" class="dropdown-item"> Get Help </a>
+                    <a href="javascript:void(0);" (click)="logout()" class="dropdown-item">Sign Out</a>
+                </div>
+            </li>
+            <li class="nav-item" routerLinkActive="active" *ngIf="!isHomepageCurrentPage()">
+                <a routerLink="/" class="nav-link">Home</a>
+            </li>
+            <li class="nav-item dropdown" routerLinkActive="active" *ngIf="isAdministrator()">
+                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Manage </a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    <a routerLink="/users" class="dropdown-item"> Users </a>
+                    <a routerLink="/labels-and-definitions" class="dropdown-item"> Labels and Definitions </a>
+                    <div class="dropdown-divider"></div>
+                    <a routerLink="/openet-integration" class="dropdown-item"> OpenET Integration </a>
+                    <a routerLink="/robust-review-scenario" class="dropdown-item"> Robust Review Scenario </a>
+                    <div class="dropdown-divider"></div>
+                    <a routerLink="/prism-monthly-syncs" class="dropdown-item"> PRISM Integration </a>
+                </div>
+            </li>
+            <li class="nav-item dropdown" routerLinkActive="active">
+                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Learn More </a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    <a routerLink="/platform-overview" class="dropdown-item"> Platform Overview </a>
+                    <a routerLink="/training" class="dropdown-item"> Training </a>
+                    <div class="dropdown-divider"></div>
+                    <a routerLink="/disclaimer/false" class="dropdown-item"> Disclaimer </a>
+                </div>
+            </li>
+            <li class="nav-item dropdown" routerLinkActive="active" *ngIf="isAuthenticated() && !isReadOnly() && !isUnassignedOrDisabled()">
+                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Report </a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    <a routerLink="/reports" class="dropdown-item" *ngIf="isAdministrator()"> Report Center </a>
+                    <a routerLink="/reports/chemigation-permit-reports" class="dropdown-item"> Chemigation Permit Report </a>
+                    <a routerLink="/reports/clearinghouse-report" class="dropdown-item"> Clearinghouse Report </a>
+                    <a routerLink="/reports/ndee-report" class="dropdown-item"> NDEE Chemicals Report </a>
+                    <a routerLink="/reports/well-inspections-report" class="dropdown-item"> Water Quality Report </a>
+                    <a routerLink="/reports/water-levels-report" class="dropdown-item"> Water Levels Report </a>
+                </div>
+            </li>
+        </ul>
+    </div>
+</nav>
+<nav class="navbar navbar-expand-xl navbar-zybach logoPadding">
+    <a routerLink="/" routerLinkActive="active" class="navbar-brand navbar-brand-primary nav-link" *ngIf="!isAuthenticated()"> Groundwater Managers Platform </a>
+
+    <div class="navbar-collapse collapse pt-2 pt-md-0" id="navbar2">
+        <ul class="navbar-nav">
+            <li class="nav-item mapItem" [ngClass]="{ 'currentPage': isWaterLevelExplorerCurrentPage(), 'float-end': !isAuthenticated() }">
+                <a class="nav-link" routerLinkActive="active" routerLink="/water-level-explorer"> <img src="/assets/main/nav/water-level-explorer.png" /> Water Level Explorer </a>
+            </li>
+            <ng-container *ngIf="isAuthenticated()">
+                <li class="nav-item dropdown dashboardItem" routerLinkActive="active" [ngClass]="{ currentPage: isDataProgramCurrentPage() }" *ngIf="!isUnassigned()">
+                    <a href="#" class="dropdown-toggle nav-link" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <img src="/assets/main/nav/dashboard.png" />
+                        Water Data Program
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item" routerLink="/dashboard"> Manager Dashboard </a>
+                        <a class="dropdown-item" routerLink="/well-pumping-summary"> Well Pumping Summary </a>
+                        <a class="dropdown-item" routerLink="/irrigation-units"> Irrigation Unit Summary </a>
+                        <a class="dropdown-item" routerLink="/farming-practices"> Farming Practices Data Explorer </a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" routerLink="/sensors"> Sensor List </a>
+                        <a class="dropdown-item" routerLink="/sensor-status"> Sensor Status Map </a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" routerLink="/sensor-anomalies" *ngIf="!isReadOnly()"> Sensor Anomaly Reports </a>
+                        <a class="dropdown-item" routerLink="/support-tickets"> Support Ticket Management </a>
+                        <a class="dropdown-item" routerLink="/sensor-health-check"> Sensor Health Check </a>
+                    </div>
+                </li>
+                <li class="nav-item dropdown mapItem" routerLinkActive="active" [ngClass]="{ currentPage: isMapCurrentPage() }" *ngIf="!isUnassigned()">
+                    <a href="#" class="dropdown-toggle nav-link" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <img src="/assets/main/nav/map.png" />
+                        Well Inventory
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item" routerLinkActive="active" routerLink="/well-map"> Well Map </a>
+                        <a class="dropdown-item" routerLinkActive="active" routerLink="/well-groups" *ngIf="isAdministrator()"> Well Groups </a>
+                    </div>
+                </li>
+                <li
+                    class="nav-item dropdown chemigationItem"
+                    routerLinkActive="active"
+                    [ngClass]="{ currentPage: isChemigationCurrentPage() }"
+                    *ngIf="!isReadOnly() && !isUnassigned()">
+                    <a href="#" class="dropdown-toggle nav-link" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <img src="/assets/main/nav/chemigation.png" />
+                        Permits and Inspections
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <a routerLink="/chemigation-permits" class="dropdown-item"> Chemigation Permits </a>
+                        <a routerLink="/chemigation-inspections" class="dropdown-item"> Chemigation Inspections </a>
+                        <a routerLink="/water-quality-inspections" class="dropdown-item"> Water Quality Inspections </a>
+                        <a routerLink="/water-level-inspections" class="dropdown-item"> Water Level Inspections </a>
+                        <a routerLink="/flow-test-report" class="dropdown-item"> Flow Test Report </a>
+                    </div>
+                </li>
+                <li class="nav-item searchItem" *ngIf="!isUnassigned()">
+                    <img src="/assets/main/nav/search.png" />
+                    <p-autoComplete
+                        #geoOptixSearch
+                        field="Name"
+                        placeholder="Search..."
+                        emptyMessage="No Results"
+                        [(ngModel)]="text"
+                        [suggestions]="searchSuggestions"
+                        (completeMethod)="search($event)"
+                        (onFocus)="reFocus(geoOptixSearch)"
+                        (onSelect)="select($event)"
+                        type="search"
+                        minLength="3">
+                        <ng-template let-result pTemplate="item">
+                            <div style="border-bottom: 1px solid #d5d5d5">
+                                <div class="objectType">
+                                    {{ result.ObjectType }}<span *ngIf="result.ObjectName">: {{ result.ObjectName }}</span>
+                                </div>
+
+                                <a routerLink="/wells/{{ result.WellID }}">
+                                    {{ result.WellName }}
+                                </a>
+                            </div>
+                        </ng-template>
+                    </p-autoComplete>
+                </li>
+            </ng-container>
+        </ul>
+    </div>
+</nav>

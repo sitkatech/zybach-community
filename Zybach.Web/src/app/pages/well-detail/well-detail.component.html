@@ -1,0 +1,41 @@
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb p-3">
+        <li class="breadcrumb-item">
+            <a routerLink="/well-map">Wells</a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">{{ wellRegistrationID }}</li>
+    </ol>
+</nav>
+<div class="container">
+    <ngb-alert *ngIf="well?.OpenSupportTickets.length > 0" [type]="'warning'" [dismissible]="false">
+        <p *ngFor="let ticket of well.OpenSupportTickets">
+            This well has an active trouble ticket
+            <a routerLink="/support-tickets/{{ ticket.SupportTicketID }}">#{{ ticket.SupportTicketID }}: {{ ticket.SupportTicketTitle }}</a> opened by
+            {{ ticket.CreatorUser.FullName }}<span *ngIf="ticket.AssigneeUser !== null"> and currently assigned to {{ ticket.AssigneeUser.FullName }}</span
+            >. Follow the <a routerLink="/support-tickets/{{ ticket.SupportTicketID }}">link</a> to view more details.
+        </p>
+    </ngb-alert>
+    <app-alert-display></app-alert-display>
+    <nav ngbNav #nav="ngbNav" [destroyOnHide]="true" [animation]="false" (shown)="resizeWindow()" class="nav-tabs nav-fill">
+        <ng-container ngbNavItem>
+            <a ngbNavLink><h5>Well Overview</h5></a>
+            <ng-template ngbNavContent>
+                <zybach-well-overview-tab [well]="well" *ngIf="well"></zybach-well-overview-tab>
+            </ng-template>
+        </ng-container>
+        <ng-container ngbNavItem>
+            <a ngbNavLink><h5>Water Data Program</h5></a>
+            <ng-template ngbNavContent>
+                <zybach-well-water-data-tab [well]="well" *ngIf="well"></zybach-well-water-data-tab>
+            </ng-template>
+        </ng-container>
+        <ng-container ngbNavItem *ngIf="!isUserReadOnly()">
+            <a ngbNavLink><h5>Permits and Inspections</h5></a>
+            <ng-template ngbNavContent>
+                <zybach-well-permits-inspections-tab [well]="well" *ngIf="well"></zybach-well-permits-inspections-tab>
+            </ng-template>
+        </ng-container>
+    </nav>
+
+    <div [ngbNavOutlet]="nav" class="mt-2"></div>
+</div>

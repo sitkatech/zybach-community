@@ -1,0 +1,47 @@
+<div class="container" *ngIf="!wells; else wellsList">
+    <div class="row">
+        <div class="col text-center">
+            <span class="fas fa-spinner loading-spinner"></span>
+            <p>Loading...</p>
+        </div>
+    </div>
+</div>
+
+<ng-template #wellsList>
+    <div class="container navCaretMargin">
+        <div class="col-12 col-md-6">
+            <h2 class="d-inline-block">Well Map</h2>
+        </div>
+        <zybach-well-map #wellMap [wellsGeoJson]="wellsGeoJson" (onWellSelected)="onMapSelection($event)" (onFilterChange)="onFilterChange($event)"> </zybach-well-map>
+    </div>
+
+    <div class="container mt-2">
+        <div class="row my-2">
+            <div class="col">
+                <a class="btn btn-zybach btn-md me-3 float-end" routerLink="/new-well"><span class="fas fa-plus"></span> New Well</a>
+                <button
+                    class="btn btn-secondary btn-md float-end me-3"
+                    style="cursor: pointer"
+                    (click)="downloadCsv()"
+                    [placement]="['bottom', 'right', 'left', 'auto']"
+                    ngbTooltip="Download as CSV"
+                    [placement]="['bottom', 'right', 'left', 'auto']">
+                    <i class="fas fa-download"></i>
+                </button>
+                <fresca-clear-grid-filters-button class="me-3 float-end" [grid]="wellsGrid"> </fresca-clear-grid-filters-button>
+            </div>
+        </div>
+        <ag-grid-angular
+            #wellsGrid
+            style="width: 100%; height: 500px"
+            class="ag-theme-balham"
+            [rowData]="wells"
+            [columnDefs]="columnDefs"
+            [pagination]="true"
+            [rowSelection]="'single'"
+            [paginationPageSize]="100"
+            (gridReady)="onGridReady($event)"
+            (selectionChanged)="onSelectionChanged($event)">
+        </ag-grid-angular>
+    </div>
+</ng-template>

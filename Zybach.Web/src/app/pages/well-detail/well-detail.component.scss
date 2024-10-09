@@ -1,0 +1,19 @@
+@import "../../../scss/variables";
+
+th {
+    width: 25%;
+    text-align: right;
+}
+
+td {
+    text-align: right;
+}
+
+#dateRangeInput {
+    border-top-left-radius: 4px;
+    border-bottom-left-radius: 4px;
+}
+
+h5 {
+    color: $primary;
+}

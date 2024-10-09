@@ -1,0 +1,22 @@
+[type="radio"] {
+    display: none;
+}
+
+.photo-workflow-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.photo-workflow-container-buttons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+    margin-bottom: 20pxF;
+
+    .btn {
+        margin-right: 10px;
+    }
+}

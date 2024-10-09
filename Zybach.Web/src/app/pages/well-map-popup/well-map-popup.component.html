@@ -1,0 +1,27 @@
+<table class="mb-1">
+    <tbody>
+        <tr>
+            <td class="rowHeader">Registration #:</td>
+            <td class="rowValue">
+                <a routerLink="/wells/{{ wellID }}">{{ wellRegistrationID }}</a>
+            </td>
+        </tr>
+        <tr *ngIf="AgHubRegisteredUser">
+            <td class="rowHeader">AgHub Registered User:</td>
+            <td>{{ AgHubRegisteredUser }}</td>
+        </tr>
+        <tr *ngIf="fieldName">
+            <td class="rowHeader">Field Name:</td>
+            <td>{{ fieldName }}</td>
+        </tr>
+        <tr>
+            <td class="rowHeader">{{ getDataSourceDisplay() }}</td>
+            <td class="rowValue">
+                <ng-container *ngIf="sensors.length > 0">
+                    <p *ngFor="let sensor of sensors" class="m-0">{{ getSensorDisplay(sensor) }}</p>
+                </ng-container>
+                <span *ngIf="sensors.length == 0">None</span>
+            </td>
+        </tr>
+    </tbody>
+</table>

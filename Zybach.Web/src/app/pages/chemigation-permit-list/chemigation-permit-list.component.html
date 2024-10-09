@@ -1,0 +1,90 @@
+<div class="container navCaretMargin">
+    <app-alert-display></app-alert-display>
+    <div class="row">
+        <div class="col-12">
+            <h2 class="d-inline-block">Chemigation Permits</h2>
+            <custom-rich-text [customRichTextTypeID]="richTextTypeID"></custom-rich-text>
+        </div>
+    </div>
+    <div class="row">
+        <div class="container col-12">
+            <div class="row my-2">
+                <div class="col">
+                    <a
+                        class="btn btn-zybach btn-md me-3 float-end"
+                        routerLink="/chemigation-permits/new"
+                        ngbTooltip="Create New Chemigation Permit"
+                        [placement]="['bottom', 'right', 'left', 'auto']"
+                        ><span class="fas fa-plus"></span> New Chemigation Permit
+                    </a>
+                    <button
+                        class="btn btn-zybach btn-md me-3 float-end"
+                        style="cursor: pointer"
+                        (click)="launchModal(renewalEntity, 'renewalEntity')"
+                        placement="top"
+                        ngbTooltip="Bulk Create Annual Renewal Applications"
+                        [placement]="['bottom', 'right', 'left', 'auto']">
+                        <span class="fas fa-plus"></span> Generate Renewal Applications
+                    </button>
+                    <button
+                        class="btn btn-secondary btn-md float-end me-3"
+                        style="cursor: pointer"
+                        (click)="exportToCsv()"
+                        placement="top"
+                        ngbTooltip="Download as CSV"
+                        [placement]="['bottom', 'right', 'left', 'auto']">
+                        <i class="fas fa-download"></i>
+                    </button>
+                    <fresca-clear-grid-filters-button class="me-3 float-end" [grid]="permitGrid"> </fresca-clear-grid-filters-button>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <ag-grid-angular
+                    #permitGrid
+                    style="width: 100%; height: 500px"
+                    class="ag-theme-balham"
+                    [columnDefs]="columnDefs"
+                    [defaultColDef]="defaultColDef"
+                    [pagination]="true"
+                    [paginationPageSize]="100"
+                    [suppressMenuHide]="true">
+                </ag-grid-angular>
+            </div>
+        </div>
+    </div>
+</div>
+
+<ng-template #createAnnualRenewalsModal let-modal>
+    <div class="modal-header">
+        <h4 class="modal-title">Generate Renewal Applications</h4>
+        <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body">
+        <div *ngIf="countOfActivePermitsWithoutRenewalRecordsForCurrentYear > 0; then havePermits; else noPermits"></div>
+        <ng-template #havePermits>
+            There are {{ countOfActivePermitsWithoutRenewalRecordsForCurrentYear | number: "1.0" }} active Chemigation Permits that do not have a renewal record for year
+            {{ currentYear }}. Would you like to create renewal records for these permits?
+            <ul>
+                <li>The renewal records will be assigned the status "Pending Renewal".</li>
+                <li>If a renewal is due for an inspection, an inspection record will be created and set to "Pending".</li>
+            </ul>
+            Note: this action cannot be undone.
+        </ng-template>
+        <ng-template #noPermits>
+            <p>All active Chemigation Permits have Renewal Records for year {{ currentYear }}.</p>
+        </ng-template>
+    </div>
+    <div class="modal-footer">
+        <button
+            type="button"
+            class="btn btn-zybach btn-sm"
+            [disabled]="isPerformingAction || !(countOfActivePermitsWithoutRenewalRecordsForCurrentYear > 0)"
+            (click)="bulkCreateAnnualRenewals()">
+            <span *ngIf="isLoadingSubmit" class="fa fa-spinner loading-spinner"></span>
+            Continue
+        </button>
+        <button type="button" class="btn btn-secondary btn-sm" (click)="modal.close('Cancel click')" [disabled]="isPerformingAction">Cancel</button>
+    </div>
+</ng-template>
