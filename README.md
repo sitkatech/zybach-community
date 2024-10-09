@@ -1,6 +1,6 @@
 # Zybach Platform Documentation
 
-Welcome to the Zybach Platform! This guide provides comprehensive instructions for setting up and building the project locally. For any questions, please contact info@groundwateraccounting.org.
+Welcome to the Zybach Platform! This guide provides comprehensive instructions for setting up and building the project locally.
 
 ---
 
@@ -24,12 +24,6 @@ Ensure the following software is installed:
 5. **Docker**
 6. **Microsoft SQL Server**
 7. **.NET 8 SDK**
-8. **Git Submodule**  
-   This project requires a Git submodule located at: [https://github.com/sitkatech/efcorepocogenerator](https://github.com/sitkatech/efcorepocogenerator). Please follow the readme found there to complete the setup. To properly link the git submodule please run the following command in this repository:
-
-   ```bash
-   git submodule update --init --recursive
-   ```
 
 ### Zybach API Setup
 
@@ -78,7 +72,7 @@ Ensure the following software is installed:
    - You may need to set up a launch configuration to point to `https://qanat.localhost.sitkatech.com`.
 
 4. **Generate models:**  
-   Run `npm run gen-model` to generate models. If there’s an issue, use the following commands to resolve it:
+   Run `npm run gen-model` to generate models. If thereâ€™s an issue, use the following commands to resolve it:
    - `npm install @openapitools/openapi-generator-cli -g`
    - `openapi-generator-cli version-manager set 5.3.0`
 
@@ -117,7 +111,7 @@ If the project doesn't work after not working on it for a while, try the followi
    Get the latest `.env`, `appsecrets.json`, `build.ini` files from a colleague as there may be environment variables added since the last time you ran the project.
 
 4. **Reach out to a colleague:**  
-   If you’re stuck, ask another developer who has recently worked on the project for help.
+   If youâ€™re stuck, ask another developer who has recently worked on the project for help.
 
 ---
 
